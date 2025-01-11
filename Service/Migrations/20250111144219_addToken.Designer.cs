@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Service.Context;
 
@@ -11,9 +12,11 @@ using Service.Context;
 namespace Service.Migrations
 {
     [DbContext(typeof(BreakthroughDbContext))]
-    partial class BreakthroughDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250111144219_addToken")]
+    partial class addToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

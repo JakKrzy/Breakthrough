@@ -1,5 +1,6 @@
 import Header from './components/Header/Header'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AlertProvider } from './context/AlertProvider'
 import Layout from './Layout'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -7,7 +8,7 @@ import Register from './pages/Register'
 
 function App() {
   return (
-    <>
+    <AlertProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -17,7 +18,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </>
+    </AlertProvider>
   )
 }
 

@@ -1,7 +1,12 @@
 import React from 'react'
 import UserForm from '../components/UserForm'
+import { useNavigate } from 'react-router-dom'
+import { useAlert } from '../context/AlertProvider'
 
 const Register = () => {
+  const navigate = useNavigate()
+  const { showAlert } = useAlert()
+
   return (
     <UserForm header="Register" onSubmit={async (nick, password) => {
       try {
@@ -15,7 +20,8 @@ const Register = () => {
             password: password
           })
         }).then(res => res.json())
-        alert(result.message)
+        showAlert(result.message)
+        navigate("/login")
       } catch (error) {
         alert(error)
       }

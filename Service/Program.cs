@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Service.Context;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BreakthroughDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("BreakthroughCStr"));
+});
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.ASCII.GetBytes("Not so secret secretNot so secret secretNot so secret secret")),
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromSeconds(1)
+    };
 });
 
 builder.Services.AddControllers();

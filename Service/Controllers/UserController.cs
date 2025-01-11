@@ -1,8 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Service.Context;
 using Service.Helpers;
 using Service.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Service.Controllers
@@ -31,7 +37,13 @@ namespace Service.Controllers
             if (!Hasher.VerifyPassword(user.Nickname, _user.Password, user.Password))
                 return NotFound(new { message = "Nickname or password incorrect" });
 
-            return Ok(new { message = "User logged in" });
+            _user.Token = createJwt(user);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { 
+                message = "User logged in",
+                AccessToken = _user.Token
+            });
         }
 
         [HttpPost("register")]
@@ -49,6 +61,26 @@ namespace Service.Controllers
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "Register successful" });
+        }
+
+        private string createJwt(User user)
+        {
+            var jwtHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("Not so secret secretNot so secret secretNot so secret secret");
+
+            var identity = new ClaimsIdentity(
+                new Claim[] { new Claim(ClaimTypes.Name, user.Nickname) });
+
+            var credentials = new SigningCredentials(
+                new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+
+            var token = jwtHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Subject = identity,
+                Expires = DateTime.UtcNow.AddDays(1),
+                SigningCredentials = credentials
+            });
+            return jwtHandler.WriteToken(token);
         }
     }
 }
