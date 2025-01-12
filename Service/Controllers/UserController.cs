@@ -5,8 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using Service.Context;
 using Service.Helpers;
 using Service.Models;
+using Service.Models.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,11 +40,17 @@ namespace Service.Controllers
                 return NotFound(new { message = "Nickname or password incorrect" });
 
             _user.Token = createJwt(user);
+            _user.RefreshToken = createRefreshToken();
+            _user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(5);
             await _dbContext.SaveChangesAsync();
 
             return Ok(new { 
                 message = "User logged in",
-                AccessToken = _user.Token
+                tokens = new TokenDto()
+                {
+                    AccessToken = _user.Token,
+                    RefreshToken = _user.RefreshToken
+                }
             });
         }
 
@@ -81,6 +89,15 @@ namespace Service.Controllers
                 SigningCredentials = credentials
             });
             return jwtHandler.WriteToken(token);
+        }
+
+        private string createRefreshToken()
+        {
+            var token = Convert.ToBase64String(
+                RandomNumberGenerator.GetBytes(64));
+            if (_dbContext.Users.Any(user => user.RefreshToken == token))
+                return createRefreshToken();
+            return token;
         }
     }
 }
