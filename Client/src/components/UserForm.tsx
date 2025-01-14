@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Form from 'react-bootstrap/Form'
 import FloatingLabel from 'react-bootstrap/FloatingLabel'
 import Button from 'react-bootstrap/Button'
+import { NavLink } from 'react-router-dom'
 
 type userFormParams = {
     header: String,
@@ -31,6 +32,12 @@ const UserForm = ({ header, onSubmit }: userFormParams) => {
             <Form.Group className="mb-3" controlId="formGroupSubmit">
                 <Button type="submit" variant="primary">{header}</Button>
             </Form.Group>
+            <div className="d-flex flex-row gap-2">
+                or
+                <NavLink to="/loginAnonymous">
+                    Log in without creating an account
+                </NavLink>
+            </div>
         </Form>
     </div>
   )

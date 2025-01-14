@@ -1,0 +1,11 @@
+.field {
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.board-container {
+    width: 550px;
+    margin: 3em auto;
+}

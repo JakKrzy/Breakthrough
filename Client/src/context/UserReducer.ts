@@ -15,8 +15,7 @@ export const userReducer = ( state: UserState, action: UserAction ) => {
         case "LOGIN":
             return { isLoggedIn: true, nickname: action.payload.nickname }
         case "LOGOUT":
-            localStorage.removeItem("accessToken")
-            localStorage.removeItem("refreshToken")
+            localStorage.clear()
             return { isLoggedIn: false, nickname: "" }
         default:
             return state

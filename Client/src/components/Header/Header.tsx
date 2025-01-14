@@ -18,6 +18,8 @@ const Header = () => {
                 <Nav className="me-auto">
                     <NavLink to="/" className={navlinkClasses}>Home</NavLink>
                     <NavLink to="/play" className={navlinkClasses}>Play</NavLink>
+                    <NavLink to="/rules" className={navlinkClasses}>Rules</NavLink>
+                    <NavLink to="/rooms" className={navlinkClasses}>Rooms</NavLink>
                 </Nav>
                 {
                     userState.isLoggedIn
