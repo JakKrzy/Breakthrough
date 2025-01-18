@@ -1,4 +1,3 @@
-import Header from './components/Header/Header'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AlertProvider } from './context/AlertProvider'
 import UserProvider from './context/UserProvider'

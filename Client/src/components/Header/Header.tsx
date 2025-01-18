@@ -6,7 +6,7 @@ import { NavLink } from 'react-router-dom'
 import { useUser } from '../../context/UserProvider'
 
 const Header = () => {
-  const { userState } = useUser()
+  const { userState: { isLoggedIn, nickname } } = useUser()
   const navlinkClasses = "me-2 p-1 fs-6 text-decoration-none text-light"
 
   return (
@@ -17,13 +17,12 @@ const Header = () => {
             <Navbar.Collapse id="navbar-nav">
                 <Nav className="me-auto">
                     <NavLink to="/" className={navlinkClasses}>Home</NavLink>
-                    <NavLink to="/play" className={navlinkClasses}>Play</NavLink>
                     <NavLink to="/rules" className={navlinkClasses}>Rules</NavLink>
-                    <NavLink to="/rooms" className={navlinkClasses}>Rooms</NavLink>
+                    { isLoggedIn && <NavLink to="/rooms" className={navlinkClasses}>Rooms</NavLink> }
                 </Nav>
                 {
-                    userState.isLoggedIn
-                    ? <Nav><NavLink to="/user" className={navlinkClasses}>{userState.nickname}</NavLink></Nav>
+                    isLoggedIn
+                    ? <Nav><NavLink to="/user" className={navlinkClasses}>{nickname}</NavLink></Nav>
                     : <Nav>
                         <NavLink to="/login" className={navlinkClasses}>Log in</NavLink>
                         <NavLink to="/register" className={navlinkClasses}>Register</NavLink>

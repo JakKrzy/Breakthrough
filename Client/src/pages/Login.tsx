@@ -24,17 +24,20 @@ const Login = () => {
             nickname: nick,
             password: password
           })
-        }).then(res => res.json())
+        })
+        const resJson = await result.json()
+        if (!result.ok)
+          throw resJson        
 
-        localStorage.setItem("accessToken", result.tokens.accessToken)
-        localStorage.setItem("refreshToken", result.tokens.refreshToken)
+        localStorage.setItem("accessToken", resJson.tokens.accessToken)
+        localStorage.setItem("refreshToken", resJson.tokens.refreshToken)
 
         userDispatch({ type: "LOGIN", payload: { nickname: nick } })
 
-        showAlert(result.message)
+        showAlert(resJson.message)
         navigate("/")
-      } catch (error) {
-        alert(error)
+      } catch (error: any) {
+        showAlert(error.message)
       }
     }} />
   )

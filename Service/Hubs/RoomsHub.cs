@@ -23,7 +23,7 @@ namespace Service.Hubs
             var clientId = Context.ConnectionId;
 
             var rooms = _db.Rooms.ToList();
-            await Clients.All.ReceiveRooms(rooms);
+            await Clients.Client(clientId).ReceiveRooms(rooms);
         }
 
         public async Task CreateRoom(string usersJwt)
