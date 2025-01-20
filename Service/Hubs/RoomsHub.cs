@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Service.Models;
 using Service.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 public interface IRoomsClient
 {
@@ -9,6 +11,7 @@ public interface IRoomsClient
 
 namespace Service.Hubs
 {
+    [Authorize]
     public class RoomsHub : Hub<IRoomsClient>
     {
         private BreakthroughDbContext _db;
@@ -26,12 +29,12 @@ namespace Service.Hubs
             await Clients.Client(clientId).ReceiveRooms(rooms);
         }
 
-        public async Task CreateRoom(string usersJwt)
+        public async Task CreateRoom()
         {
-            var clientId = Context.ConnectionId;
-            var user = _db.Users.Where(user => user.Token == usersJwt).FirstOrDefault();
+            var userName = Context.GetHttpContext()?.User.Identity?.Name;
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == userName);
             if (user == null)
-                throw new ArgumentException("usersJwt not found");
+                throw new ArgumentException("User not found");
             var room = new Room()
             {
                 Name = $"{user.Nickname}'s room",
@@ -44,6 +47,18 @@ namespace Service.Hubs
             var rooms = _db.Rooms.ToList();
 
             await Clients.All.ReceiveRooms(rooms);
+        }
+
+        public async Task JoinRoom(string usersJwt, int roomId)
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Token == usersJwt);
+            if (user == null) throw new ArgumentException("User not found");
+            
+            var room = await _db.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
+            if (room == null) throw new ArgumentException("Room not found");
+
+            room.Player2Id = user.Id;
+            await _db.SaveChangesAsync();
         }
     }
 }

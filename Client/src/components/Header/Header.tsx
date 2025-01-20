@@ -4,10 +4,17 @@ import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
 import { NavLink } from 'react-router-dom'
 import { useUser } from '../../context/UserProvider'
+import { useAlert } from '../../context/AlertProvider'
 
 const Header = () => {
-  const { userState: { isLoggedIn, nickname } } = useUser()
+  const { userState: { isLoggedIn, nickname }, userDispatch } = useUser()
   const navlinkClasses = "me-2 p-1 fs-6 text-decoration-none text-light"
+  const { showAlert } = useAlert()
+
+  const logout = () => {
+    userDispatch({ type: 'LOGOUT', payload: {}})
+    showAlert("Logged out")
+  }
 
   return (
     <Navbar expand="lg" bg="dark" variant="dark" collapseOnSelect>
@@ -22,7 +29,12 @@ const Header = () => {
                 </Nav>
                 {
                     isLoggedIn
-                    ? <Nav><NavLink to="/user" className={navlinkClasses}>{nickname}</NavLink></Nav>
+                    ? <Nav>
+                        <NavLink to="/user" className={navlinkClasses}>{nickname}</NavLink>
+                        <NavLink to="/" className={navlinkClasses} onClick={logout}>
+                            Log out
+                        </NavLink>
+                    </Nav>
                     : <Nav>
                         <NavLink to="/login" className={navlinkClasses}>Log in</NavLink>
                         <NavLink to="/register" className={navlinkClasses}>Register</NavLink>

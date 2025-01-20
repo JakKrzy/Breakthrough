@@ -29,13 +29,13 @@ const Login = () => {
         if (!result.ok)
           throw resJson        
 
-        localStorage.setItem("accessToken", resJson.tokens.accessToken)
-        localStorage.setItem("refreshToken", resJson.tokens.refreshToken)
+        sessionStorage.setItem("accessToken", resJson.tokens.accessToken)
+        sessionStorage.setItem("refreshToken", resJson.tokens.refreshToken)
 
         userDispatch({ type: "LOGIN", payload: { nickname: nick } })
 
         showAlert(resJson.message)
-        navigate("/")
+        navigate("/rooms")
       } catch (error: any) {
         showAlert(error.message)
       }

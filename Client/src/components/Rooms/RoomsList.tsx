@@ -4,16 +4,20 @@ import Container from 'react-bootstrap/Container'
 import { NavLink } from 'react-router-dom'
 import Pawn from '../../assets/BlackPawn.svg'
 import Button from 'react-bootstrap/Button'
+import { useNavigate } from 'react-router-dom'
 
-type Room = { name: string }
+type Room = { id: number, name: string }
 
 const RoomsList = () => {
   const [connection, setConnection] = useState<SignalR.HubConnection | null>(null)
   const [rooms, setRooms] = useState<Room[] | null>(null)
+  const navigate = useNavigate()
   
   useEffect(() => {
     const newConnection = new SignalR.HubConnectionBuilder()
-        .withUrl(`${import.meta.env.VITE_HOST}/roomsHub`)
+        .withUrl(
+          `${import.meta.env.VITE_HOST}/roomsHub`,
+          { accessTokenFactory: () => sessionStorage.getItem("accessToken") || "" })
         .withAutomaticReconnect()
         .build()
 
@@ -28,9 +32,14 @@ const RoomsList = () => {
         })
   }, [connection])
 
-  const createRoom = () => {
-    const jwt = localStorage.getItem("accessToken")
-    connection?.invoke("CreateRoom", jwt)
+  const createRoom = async () => {
+    await connection?.invoke("CreateRoom")
+    navigate("/play")
+  }
+
+  const enterRoom = async (id: number) => {
+    const jwt = sessionStorage.getItem("accessToken")
+    await connection?.invoke("JoinRoom", jwt, id)
   }
 
   return (
@@ -50,7 +59,7 @@ const RoomsList = () => {
                     >
                         <img src={Pawn} alt="Pawn" className="pawn-icon" />
                         {room.name}
-                        <NavLink to="/">Enter</NavLink>
+                        <NavLink to="/play" onClick={() => enterRoom(room.id)}>Enter</NavLink>
                     </div>
                 )
             }
