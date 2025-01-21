@@ -11,6 +11,7 @@ namespace Service.Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        public DbSet<Game> Games { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +24,16 @@ namespace Service.Context
                 .HasOne(m => m.Player2)
                 .WithOne()
                 .HasForeignKey<Room>(m => m.Player2Id);
+            modelBuilder.Entity<Game>()
+                .HasOne(m => m.Winner)
+                .WithMany(m => m.WonGames)
+                .HasForeignKey(m => m.WinnerId)
+                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Game>()
+                .HasOne(m => m.Loser)
+                .WithMany(m => m.LostGames)
+                .HasForeignKey(m => m.LoserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

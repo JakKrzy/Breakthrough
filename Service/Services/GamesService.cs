@@ -4,19 +4,19 @@ namespace Service.Services
 {
     public class GamesService
     {
-        private static List<Game> games = new();
+        private static List<GameState> games = new();
 
         public void AddGame(int playerId, string playerConnectionId, string roomName)
         {
             lock (games)
             {
-                games.Add(new Game(playerId, playerConnectionId, roomName));
+                games.Add(new GameState(playerId, playerConnectionId, roomName));
             }
         }
 
-        public Game? GetGame(int playerId)
+        public GameState? GetGame(int playerId)
         {
-            Game? game;
+            GameState? game;
             lock (games)
             {
                 game = games.FirstOrDefault(g => g.Player1Id == playerId || g.Player2Id == playerId);
@@ -24,9 +24,9 @@ namespace Service.Services
             return game;
         }
 
-        public Game? GetGame(string connectionId)
+        public GameState? GetGame(string connectionId)
         {
-            Game? game;
+            GameState? game;
             lock (games)
             {
                 game = games.FirstOrDefault(g =>

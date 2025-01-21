@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,34 @@ namespace Service.Controllers
             await _dbContext.Users.AddAsync(user);
             await _dbContext.SaveChangesAsync();
             return Ok(new { message = "Register successful" });
+        }
+
+        [Authorize]
+        [HttpGet("info")]
+        public async Task<IActionResult> Info()
+        {
+            var userName = HttpContext.User.Identity?.Name;
+            if (userName == null)
+                return BadRequest(new { message = "User not logged in" });
+            
+            var user = await _dbContext
+                .Users
+                .Include(u => u.WonGames)
+                .ThenInclude(g => g.Loser)
+                .Include(u => u.LostGames)
+                .ThenInclude(g => g.Winner)
+                .SingleOrDefaultAsync(u => u.Nickname == userName);
+
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            return Ok(new {
+                Nickname = user.Nickname,
+                LostGames = user.LostGames?.Select(
+                    g => new GameDto(){ Date = g.Date, Nickname = g.Winner.Nickname }),
+                WonGames = user.WonGames?.Select(
+                    g => new GameDto() { Date = g.Date, Nickname= g.Loser.Nickname }),
+            });
         }
 
         private string createJwt(User user)

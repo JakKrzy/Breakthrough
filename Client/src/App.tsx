@@ -9,6 +9,7 @@ import Play from './pages/Play'
 import Rules from './pages/Rules'
 import LoginAnonymous from './pages/LoginAnonymous'
 import Rooms from './pages/Rooms'
+import User from './pages/User'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="rules" element={<Rules />} />
               <Route path="loginAnonymous" element={<LoginAnonymous />} />
               <Route path="rooms" element={<Rooms />} />
+              <Route path="user" element={<User />} />
             </Route>
           </Routes>
         </BrowserRouter>

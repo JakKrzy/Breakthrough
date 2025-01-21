@@ -1,6 +1,6 @@
 ﻿namespace Service.Services
 {
-    public class Game
+    public class GameState
     {
         public int Player1Id { get; set; }
         public int? Player2Id { get; set; }
@@ -16,7 +16,7 @@
         private int[][] Board;
         public int Turn { get; private set; }
 
-        public Game(int playerId, string playerConnectionId, string roomName)
+        public GameState(int playerId, string playerConnectionId, string roomName)
         {
             Player1Id = playerId;
             Player1ConnectionId = playerConnectionId;

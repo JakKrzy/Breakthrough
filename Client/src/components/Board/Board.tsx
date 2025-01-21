@@ -6,7 +6,8 @@ import WhitePawn from '../../assets/WhitePawn.svg'
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Modal from 'react-bootstrap/Modal'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useUser } from '../../context/UserProvider'
 import './Board.css'
 
 type Piece = 0 | 1 | null
@@ -31,6 +32,8 @@ const Board = () => {
   const [selectedField, setSelectedField] = useState<SelectedField>(undefined)
   const [resultModal, setResultModal] = useState<ResultModalState>({ show: false, message: "" })
   const { showAlert } = useAlert()
+  const { userState } = useUser()
+  const navigate = useNavigate()
 
   useEffect(() => {
       const newConnection = new SignalR.HubConnectionBuilder()
@@ -43,6 +46,14 @@ const Board = () => {
       setConnection(newConnection)
       setResultModal({ show: false, message: "" })
   }, [])
+
+  useEffect(() => {
+    if (!userState.isLoggedIn && connection) {
+      connection.stop()
+      setConnection(null)
+      navigate("/")
+    }
+  }, [userState.isLoggedIn])
 
   useEffect(() => {
       if (!connection) return

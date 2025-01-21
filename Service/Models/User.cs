@@ -11,5 +11,7 @@ namespace Service.Models
         public string? Token { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
+        public List<Game>? WonGames { get; set; }
+        public List<Game>? LostGames { get; set; }
     }
 }

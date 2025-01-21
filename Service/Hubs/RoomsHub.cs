@@ -3,6 +3,7 @@ using Service.Models;
 using Service.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.Runtime.CompilerServices;
 
 public interface IRoomsClient
 {
@@ -44,9 +45,7 @@ namespace Service.Hubs
             await _db.Rooms.AddAsync(room);
             await _db.SaveChangesAsync();
 
-            var rooms = _db.Rooms.ToList();
-
-            await Clients.All.ReceiveRooms(rooms);
+            await DisplayRooms();
         }
 
         public async Task JoinRoom(string usersJwt, int roomId)
@@ -59,6 +58,14 @@ namespace Service.Hubs
 
             room.Player2Id = user.Id;
             await _db.SaveChangesAsync();
+
+            await DisplayRooms();
+        }
+
+        private async Task DisplayRooms()
+        {
+            var rooms = _db.Rooms.Where(r => r.Player2Id == null).ToList();
+            await Clients.All.ReceiveRooms(rooms);
         }
     }
 }

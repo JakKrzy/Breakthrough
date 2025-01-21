@@ -40,7 +40,7 @@ namespace Service.Hubs
             if (room == null) throw new Exception("User not in a room");
 
             var opponentId = room.Player1Id == user.Id ? room.Player2Id : room.Player1Id;
-            Game? game;
+            GameState? game;
             if (opponentId == null)
             {
                 _gamesService.AddGame(user.Id, connectionId, room.Name);
@@ -113,6 +113,16 @@ namespace Service.Hubs
             {
                 await Clients.Client(connectionId).NotifyWin();
                 await Clients.Client(oppsConnectionId).NotifyLoss();
+                var winnerId = (int)(playerColor == game.Player1Color ? game.Player1Id : game.Player2Id);
+                var loserId  = (int)(playerColor == game.Player1Color ? game.Player2Id : game.Player1Id);
+                
+                await _db.Games.AddAsync(new Game() {
+                    WinnerId = winnerId,
+                    LoserId = loserId,
+                    Date = DateTime.Now
+                });
+                var n = await _db.SaveChangesAsync();
+                Console.WriteLine(n);
             }
         }
         

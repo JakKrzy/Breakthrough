@@ -77,7 +77,6 @@ app.UseCors("Breakthrough");
 
 app.UseAuthorization();
 
-
 app.MapControllers();
 app.MapHub<RoomsHub>("/roomsHub");
 app.MapHub<PlayHub>("/playHub");
