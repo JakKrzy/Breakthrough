@@ -17,8 +17,8 @@ namespace Service.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    WinnerId = table.Column<int>(type: "int", nullable: false),
-                    LoserId = table.Column<int>(type: "int", nullable: false),
+                    WinnerId = table.Column<int>(type: "int", nullable: true),
+                    LoserId = table.Column<int>(type: "int", nullable: true),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

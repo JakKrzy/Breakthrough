@@ -56,12 +56,13 @@ const UserInfo = () => {
                     { user != undefined &&
                         user.wonGames.map((g, index) => {
                             const date = new Date(Date.parse(g.date))
+                            const nick = g.nickname == null ? "Anonynymous user" : g.nickname
                             return ( 
                             <div 
                                 className="border rounded bg-success p-2 d-flex align-items-center justify-content-around text-light"
                                 key={index}
                             >
-                                <div>Vs. {g.nickname}</div>
+                                <div>Vs. {nick}</div>
                                 <div>{`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`}</div>
                             </div>
                         )})
@@ -74,12 +75,13 @@ const UserInfo = () => {
                     { user != undefined &&
                         user.lostGames.map((g, index) => {
                             const date = new Date(Date.parse(g.date))
+                            const nick = g.nickname == null ? "Anonynymous user" : g.nickname
                             return ( 
                             <div 
-                                className="border rounded bg-success p-2 d-flex align-items-center justify-content-around text-light"
+                                className="border rounded bg-danger p-2 d-flex align-items-center justify-content-around text-light"
                                 key={index}
                             >
-                                <div>Vs. {g.nickname}</div>
+                                <div>Vs. {nick}</div>
                                 <div>{`${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`}</div>
                             </div>
                         )})

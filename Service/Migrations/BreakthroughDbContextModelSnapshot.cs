@@ -33,10 +33,10 @@ namespace Service.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LoserId")
+                    b.Property<int?>("LoserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("WinnerId")
+                    b.Property<int?>("WinnerId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -111,14 +111,12 @@ namespace Service.Migrations
                     b.HasOne("Service.Models.User", "Loser")
                         .WithMany("LostGames")
                         .HasForeignKey("LoserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Service.Models.User", "Winner")
                         .WithMany("WonGames")
                         .HasForeignKey("WinnerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Loser");
 

@@ -72,6 +72,34 @@ namespace Service.Controllers
             return Ok(new { message = "Register successful" });
         }
 
+        [HttpPost("loginAnon")]
+        public async Task<IActionResult> LoginAnon([FromBody] User user)
+        {
+            if (user.Nickname == null) return BadRequest();
+            if (await _dbContext.Users.AnyAsync(_user => _user.Nickname == user.Nickname))
+                return BadRequest(new { message = "This nickname is taken" });
+
+            var _user = new User()
+            {
+                Nickname = user.Nickname,
+                Token = createJwt(user),
+                RefreshToken = createRefreshToken(),
+                RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(5)
+            };
+            _dbContext.Users.Add(_user);            
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Anonymous user logged in",
+                tokens = new TokenDto()
+                {
+                    AccessToken = _user.Token,
+                    RefreshToken = _user.RefreshToken
+                }
+            });
+        }
+
         [Authorize]
         [HttpGet("info")]
         public async Task<IActionResult> Info()
@@ -94,9 +122,9 @@ namespace Service.Controllers
             return Ok(new {
                 Nickname = user.Nickname,
                 LostGames = user.LostGames?.Select(
-                    g => new GameDto(){ Date = g.Date, Nickname = g.Winner.Nickname }),
+                    g => new GameDto() { Date = g.Date, Nickname = g.Winner == null ? null : g.Winner.Nickname }),
                 WonGames = user.WonGames?.Select(
-                    g => new GameDto() { Date = g.Date, Nickname= g.Loser.Nickname }),
+                    g => new GameDto() { Date = g.Date, Nickname = g.Loser == null ? null : g.Loser.Nickname }),
             });
         }
 

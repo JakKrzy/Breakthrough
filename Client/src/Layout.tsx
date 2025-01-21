@@ -1,10 +1,16 @@
-import React from 'react'
+import { useEffect } from 'react'
 import Header from './components/Header/Header'
 import { Outlet } from 'react-router-dom'
-import Alert from 'react-bootstrap/Alert'
+import { useUser } from './context/UserProvider'
 
 
 const Layout = () => {
+  const { userState: { connection } } = useUser()
+  useEffect(() => {
+    if (!connection) return;
+    connection.start()
+  }, [connection])
+
   return (
     <>
       <Header />

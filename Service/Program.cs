@@ -80,5 +80,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<RoomsHub>("/roomsHub");
 app.MapHub<PlayHub>("/playHub");
+app.MapHub<AnonUserHub>("/anonUserHub");
 
 app.Run();
