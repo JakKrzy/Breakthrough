@@ -81,6 +81,7 @@
             var (fromCol, fromRow, toCol, toRow) = FlipMoveIfNeeded(ParseMove(move), player);
             
             if (Board[fromRow][fromCol] != player) return false;
+            if (Board[toRow][toCol] == player) return false;
             if (Math.Abs(toCol - fromCol) > 1) return false;
             if (player == 0 && toRow != fromRow - 1) return false;
             if (player == 1 && toRow != fromRow + 1) return false;

@@ -9,11 +9,12 @@ namespace Service.Hubs
 {
     public interface IPlayHubClient
     {
-        Task DisplayBoard(int[][] board);
+        Task DisplayBoard(int[][] board, int turn);
         Task OpponentDisconnected();
         Task PromptMove(string message);
         Task NotifyWin();
         Task NotifyLoss();
+        Task DisplayOppNick(string nick);
     }
 
     [Authorize]
@@ -54,9 +55,22 @@ namespace Service.Hubs
 
             if (game == null)
                 throw new Exception("Game not found");
-            var (board, flipped) = game.GetBoards();
+            
             await Groups.AddToGroupAsync(connectionId, room.Name);
-            await Clients.Client(connectionId).DisplayBoard(game.Player1Id == user.Id ? board : flipped);
+            
+            if (game.Player2Id == user.Id)
+            {
+                var opponent = await _db.Users.SingleAsync(u => u.Id == game.Player1Id);
+                if (opponent == null) throw new Exception("Opponent not found");
+
+                await Clients.Client(game.Player1ConnectionId).DisplayOppNick(user.Nickname);
+                await Clients.Client(connectionId).DisplayOppNick(opponent.Nickname);
+                
+                var (board, flipped) = game.GetBoards();
+
+                await Clients.Client(connectionId).DisplayBoard(flipped, game.Turn);
+                await Clients.Client(game.Player1ConnectionId).DisplayBoard(board, game.Turn);
+            }
         }
 
         public override async Task OnDisconnectedAsync(Exception? exception)
@@ -65,17 +79,22 @@ namespace Service.Hubs
             var userName = Context.GetHttpContext()?.User.Identity?.Name;
             if (userName == null) throw new Exception("User not found");
 
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Nickname == userName);
-            if (user == null) throw new Exception("User not found");
-            
-            var room = await _db.Rooms.FirstOrDefaultAsync(r => r.Player1Id == user.Id || r.Player2Id == user.Id);
+            var game = _gamesService.GetGame(connectionId);
+            if (game == null) throw new Exception("Game not found");
+
+            var room = await _db.Rooms.FirstOrDefaultAsync(r => r.Player1Id == game.Player1Id);
             if (room == null) throw new Exception("User not in a room");
 
-            await Clients.Group(room.Name).OpponentDisconnected();
+            if (game.Player2ConnectionId != null)
+                await Clients.Client(
+                    game.Player1ConnectionId == connectionId
+                    ? game.Player2ConnectionId
+                    : game.Player1ConnectionId)
+                    .OpponentDisconnected();
 
             _db.Rooms.Remove(room);
             await _db.SaveChangesAsync();
-            _gamesService.RemoveGame(user.Id);
+            _gamesService.RemoveGame(game.Player1Id);
         }
 
         public async Task PlayMove(string move)
@@ -101,12 +120,12 @@ namespace Service.Hubs
             var (board, flipped) = game.GetBoards();
             if (playerColor == 0)
             {
-                await Clients.Client(connectionId).DisplayBoard(board);
-                await Clients.Client(oppsConnectionId).DisplayBoard(flipped);
+                await Clients.Client(connectionId).DisplayBoard(board, game.Turn);
+                await Clients.Client(oppsConnectionId).DisplayBoard(flipped, game.Turn);
             } else
             {
-                await Clients.Client(connectionId).DisplayBoard(flipped);
-                await Clients.Client(oppsConnectionId).DisplayBoard(board);
+                await Clients.Client(connectionId).DisplayBoard(flipped, game.Turn);
+                await Clients.Client(oppsConnectionId).DisplayBoard(board, game.Turn);
             }
 
             if (game.IsWin(playerColor))

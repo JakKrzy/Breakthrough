@@ -2,6 +2,7 @@ import React from 'react'
 import Navbar from 'react-bootstrap/Navbar'
 import Container from 'react-bootstrap/Container'
 import Nav from 'react-bootstrap/Nav'
+import Button from 'react-bootstrap/Button'
 import { NavLink } from 'react-router-dom'
 import { useUser } from '../../context/UserProvider'
 import { useAlert } from '../../context/AlertProvider'
@@ -31,9 +32,9 @@ const Header = () => {
                     isLoggedIn
                     ? <Nav>
                         <NavLink to="/user" className={navlinkClasses}>{nickname}</NavLink>
-                        <NavLink to="/" className={navlinkClasses} onClick={logout}>
+                        <Button onClick={logout} className={navlinkClasses}>
                             Log out
-                        </NavLink>
+                        </Button>
                     </Nav>
                     : <Nav>
                         <NavLink to="/login" className={navlinkClasses}>Log in</NavLink>

@@ -16,7 +16,8 @@ type Board = Piece[][]
 type SelectedField = [number, number] | undefined
 
 type GameState = {
-  board: Board
+  board: Board,
+  turn: number
 }
 
 type ResultModalState = {
@@ -26,11 +27,10 @@ type ResultModalState = {
 
 const Board = () => {
   const [connection, setConnection] = useState<SignalR.HubConnection | null>(null)
-  const [gameState, setGameState] = useState<GameState>({
-    board: Array(8).fill(Array(8).fill(null))
-  })
+  const [gameState, setGameState] = useState<GameState | null>(null)
   const [selectedField, setSelectedField] = useState<SelectedField>(undefined)
   const [resultModal, setResultModal] = useState<ResultModalState>({ show: false, message: "" })
+  const [opponentNick, setOpponentNick] = useState("")
   const { showAlert } = useAlert()
   const { userState } = useUser()
   const navigate = useNavigate()
@@ -59,13 +59,24 @@ const Board = () => {
       if (!connection) return
       connection.start()
           .then(() => {
-              connection.on("DisplayBoard", (board: any) => setGameState({ board }))
+              connection.on("DisplayBoard", displayBoard)
               connection.on("PromptMove", (msg: string) => showAlert(msg))
-              connection.on("OpponentDisconnected", () => { connection.stop(); setConnection(null) })
+              connection.on("OpponentDisconnected", opponentDisconnected)
               connection.on("NotifyWin",  () => gameEnd("You win!"))
               connection.on("NotifyLoss", () => gameEnd("You lose..."))
+              connection.on("DisplayOppNick", (nick: string) => setOpponentNick(nick))
           })
   }, [connection])
+
+  const opponentDisconnected = () => {
+    connection?.stop()
+    setConnection(null)
+    showModal("Opponent disconnected")
+  }
+
+  const displayBoard = (board: any, turn: number) => {
+    setGameState({ board, turn })
+  }
 
   const showModal = (msg: string) => {
     setResultModal({ show: true, message: msg })
@@ -84,6 +95,7 @@ const Board = () => {
   const move = (toCol: number, toRow: number) => {
     if (selectedField === undefined) return
     const [sCol, sRow] = selectedField
+    setSelectedField(undefined)
     connection?.invoke("PlayMove", `${sCol}${sRow}${toCol}${toRow}`)
   }
 
@@ -91,7 +103,7 @@ const Board = () => {
     if (selectedField === undefined) return false
     const [scol, srow] = selectedField
     if (Math.abs(col - scol) > 1) return false
-    if (row != srow + 1) return false
+    if (row != srow - 1) return false
     console.log(row, srow)
     return true
   }
@@ -118,37 +130,48 @@ const Board = () => {
     return (col + row) % 2 == 0 ? "bg-light" : "bg-success"
   }
 
+  if (gameState === null) return (
+    <div><h1>Waiting for opponent...</h1></div>
+  )
+
   return (
     <>
-      <div className='border board-container'>
-        {
-          gameState.board.map((row: Piece[], rowIndex) => {
-            return (
-              <Row key={rowIndex}>
-                {
-                  row.map((field: Piece, colIndex) => {
-                    return (
-                      <Col key={colIndex} className='p-0'>
-                        <div 
-                          className={fieldColor(colIndex, rowIndex) + " field"}
-                          onClick={() => fieldOnClick(colIndex, rowIndex)}
-                          >
-                          { 
-                            field === 0
-                            ? <img src={WhitePawn} alt="White pawn" />
-                            : field === 1
-                            ? <img src={BlackPawn} alt="black pawn" />
-                            : <></>
-                          }
-                        </div>
-                      </Col>
-                    )
-                  })
-                }
-              </Row>
-            )
-          })
-        }
+      <div className='board-container'>
+        <div>{opponentNick}</div>
+        <div>
+          {
+            gameState.board.map((row: Piece[], rowIndex) => {
+              return (
+                <Row key={rowIndex}>
+                  {
+                    row.map((field: Piece, colIndex) => {
+                      return (
+                        <Col key={colIndex} className='p-0'>
+                          <div 
+                            className={fieldColor(colIndex, rowIndex) + " field"}
+                            onClick={() => fieldOnClick(colIndex, rowIndex)}
+                            >
+                            { 
+                              field === 0
+                              ? <img src={WhitePawn} alt="White pawn" />
+                              : field === 1
+                              ? <img src={BlackPawn} alt="black pawn" />
+                              : <></>
+                            }
+                          </div>
+                        </Col>
+                      )
+                    })
+                  }
+                </Row>
+              )
+            })
+          }
+        </div>
+        <div className="d-flex flex-row align-items-center justify-content-between">
+          <div>{gameState.turn % 2 === 0 ? "White to play" : "Black to play" }</div>
+          <div>{userState.nickname}</div>
+        </div>
       </div>
       <Modal show={resultModal.show} onHide={onModalClose}>
         <Modal.Dialog>
